@@ -10,14 +10,15 @@ def home():
 def register():
     email = request.json.get('email')
     password = request.json.get('password')
+    name = request.json.get('name')
 
-    if not email or not password:
-        return jsonify({'message': 'Email and password are required'}), 400
+    if not email or not password or not name:
+        return jsonify({'message': 'Email, password and name are required'}), 400
 
     if get_user_by_email(email):
         return jsonify({'message': 'Email address already registered'}), 400
 
-    create_user(email, password)
+    create_user(email, password, name)
 
     return jsonify({'message': 'User created successfully'}), 201
 

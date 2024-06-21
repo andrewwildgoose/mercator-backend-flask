@@ -21,10 +21,10 @@ def init_db(app):
     with app.app_context():
         db.create_all()
 
-def create_user(email, password):
+def create_user(email, password, name):
     from app.models import User  # Import here to avoid circular import
     hashed_password = generate_password_hash(password)
-    new_user = User(email=email, password_hash=hashed_password)
+    new_user = User(email=email, password_hash=hashed_password, name=name)
     db.session.add(new_user)
     db.session.commit()
 
