@@ -9,10 +9,14 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 
 # Configure Flask app
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')  # Set secret key for session management
-
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='None',  # or 'None' for cross-site requests
+)
 # Initialize Flask-Migrate with the Flask app and SQLAlchemy db instance
 migrate = Migrate(app, db)
 

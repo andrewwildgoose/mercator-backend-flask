@@ -98,3 +98,11 @@ cython_debug/
 
 # dotenv
 .env
+
+# Ignore Alembic configuration for Database
+alembic.ini
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+script.py.mako

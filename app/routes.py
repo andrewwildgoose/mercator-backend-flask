@@ -1,13 +1,28 @@
+
 from flask import request, jsonify, session, current_app as app
+from flask_cors import CORS
+from flask_session import Session
 from app import app
 from app.database import create_user, get_user_by_email
 from app.gpx_service import save_gpx_file, save_file_share, delete_gpx_file_from_db
 from app.models import GpxFile, FileShare, Track, TrackPoint
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+app.secret_key = os.getenv('SECRET_KEY')
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config['SESSION_TYPE'] = 'filesystem'
+
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:5173"}}, expose_headers='session')
+Session(app)
 
 
 @app.route('/')
 def home():
-    return "Hello World"
+    return "mercator"
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -38,7 +53,15 @@ def login():
     # Log in the user (for session-based authentication)
     session['user_id'] = user.id
 
-    return jsonify({'message': 'Logged in successfully'}), 200
+    print(f"Session user_id set: {session['user_id']}")
+    
+    response = jsonify({'message': 'Logged in successfully'})
+    response.set_cookie('session', session.sid, httponly=True, samesite='None', secure=False)
+
+    print(f"Response headers: {response.headers}")
+
+    return response
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -71,6 +94,7 @@ def upload_gpx():
 @app.route('/my-gpx-files', methods=['GET'])
 def get_my_gpx_files():
     if 'user_id' not in session:
+        print(f"Session user_id not set")
         return jsonify({'error': 'Unauthorized'}), 401
 
     user_id = session['user_id']
@@ -156,3 +180,6 @@ def delete_gpx_file(gpx_file_id):
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'gpx'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+if __name__ == '__main__':
+    app.run(port=5000)
